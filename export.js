@@ -21,8 +21,6 @@ function start (urlOrigem, urlDestino) {
         urlDestino = 'C:\\Users\\andre.luz\\Desktop\\exportados\\';
        
         copyFolderRecursiveSync(urlOrigem, urlDestino);
-
-        console.log('Loop executado');
         
     }
     
@@ -44,7 +42,6 @@ function copyFolderRecursiveSync( source, target ) {
         //copy
         if ( fs.lstatSync( source ).isDirectory() ) {
             files = fs.readdirSync( source );
-            //targetFiles = getFilesByExtension(files);
             files.forEach( function ( file ) {
                 var curSource = path.join( source, file );
                 let metaData = fs.lstatSync( curSource );
@@ -67,7 +64,6 @@ function copyFolderRecursiveSync( source, target ) {
 }
 
 function copyFileSync( source, target ) {
-
     var targetFile = target;
     try{
         //if target is a directory a new file with the same name will be created
@@ -86,16 +82,5 @@ function copyFileSync( source, target ) {
 function stop(){
     started = false;
 }
-
-async function getMetadata(file){
-    await fileMetadata(file)
-        .then(res =>{
-            return res;
-        })
-        .catch(err =>{
-            console.error('getMetaData()', err);
-        });
-}
-
 
 module.exports = {start, stop};
