@@ -1,86 +1,110 @@
 const path = require('path');
-const fs = require('fs');  
-const extension = ".class";
-const fsm = require('fs-meta').sync;
+const fs = require('fs');
+const LOGGER = require('./logger');
 
 let dtUltExport = null;
 let started = true;
 
-function start (urlOrigem, urlDestino) {
-    console.log('Procurando por novos arquivos...');
-    if(dtUltExport == null){
-        try{
-            dtUltExport = new Date();
-        } catch(err){
-            console.error(err);
-        }
+const EXTENSION = ".class";
+
+URL_ORIGEM = '/Users/ximenes/desenvolvimento/eclipse_workspace/p2k-15.07.XX-TIM/bin';
+URL_DESTINO = '/Users/ximenes/Desktop';
+TIMEOUT = 5000;
+
+function start() {
+    try {
+        validaPath(URL_ORIGEM);
+        LOGGER.clear();
+        LOGGER.printLogo();
+        LOGGER.printLine();
+        LOGGER.printLog("ORIGEM: " + URL_ORIGEM);
+        LOGGER.printLog("DESTINO: " + URL_DESTINO);
+        LOGGER.printLine();
+        watch();
+
+    } catch (err) {
+        LOGGER.printError('Erro durante a execução do programa:');
+        LOGGER.printError(err);
     }
-    
-    if(started) {
-        urlOrigem = 'D:\\workspace_sts\\p2k-15.07.XX\\bin';
-        urlDestino = 'C:\\Users\\andre.luz\\Desktop\\exportados\\';
-       
-        copyFolderRecursiveSync(urlOrigem, urlDestino);
-        
-    }
-    
-    setTimeout(() => {
-        start();
-    }, 5000);
 }
 
-function copyFolderRecursiveSync( source, target ) {
-    var files = [];
+function watch() {
+    try {
+        validaPath(URL_ORIGEM);
 
-    //check if folder needs to be created or integrated
-    var targetFolder = path.join( target, path.basename( source ) );
-    if ( !fs.existsSync( targetFolder ) ) {
-        fs.mkdirSync( targetFolder );
-    }
-
-    try{
-        //copy
-        if ( fs.lstatSync( source ).isDirectory() ) {
-            files = fs.readdirSync( source );
-            files.forEach( function ( file ) {
-                var curSource = path.join( source, file );
-                let metaData = fs.lstatSync( curSource );
-                if ( metaData.isDirectory() ) {
-                    copyFolderRecursiveSync( curSource, targetFolder );
-                } else {
-                    let fileDtLastModified = metaData.mtime;
-                    if(fileDtLastModified > dtUltExport){
-                        dtUltExport = fileDtLastModified;
-                        copyFileSync( curSource, targetFolder );
-                        console.log('Arquivo: ' + file + " copiado para: " + targetFolder)
-                    }
-                }
-            } );
+        LOGGER.printLog('Monitorando o path: ' + URL_ORIGEM);
+        if (dtUltExport == null) {
+            dtUltExport = new Date();
         }
 
-    } catch(err){
+        if (started) {
+            copyFolderRecursiveSync(URL_ORIGEM, URL_DESTINO);
+        }
+
+        setTimeout(() => {
+            watch();
+        }, TIMEOUT);
+    } catch (err) {
+        LOGGER.printError('Erro durante a execução do programa.');
+        LOGGER.printError(err);
+    }
+}
+
+function copyFolderRecursiveSync(source, target) {
+    var files = [];
+    try {
+        //check if folder needs to be created or integrated
+        var targetFolder = path.join(target, path.basename(source));
+
+        //copy
+        if (fs.lstatSync(source).isDirectory()) {
+            files = fs.readdirSync(source);
+            files.forEach(function (file) {
+                var curSource = path.join(source, file);
+                let metaData = fs.lstatSync(curSource);
+                if (metaData.isDirectory()) {
+                    copyFolderRecursiveSync(curSource, targetFolder);
+                } else {
+                    let fileDtLastModified = metaData.mtime;
+                    let fileExtension = file.substring(file.indexOf('.'));
+                    if (fileDtLastModified > dtUltExport && fileExtension === EXTENSION) {
+                        if (!fs.existsSync(targetFolder)) {
+                            fs.mkdirSync(targetFolder, { recursive: true });
+                        }
+                        dtUltExport = fileDtLastModified;
+                        copyFileSync(curSource, targetFolder);
+                        LOGGER.printLog('ARQUIVO COPIADO: ' + path.join(targetFolder, file), true);
+                    }
+                }
+            });
+        }
+    } catch (err) {
         console.error(err);
     }
 }
 
-function copyFileSync( source, target ) {
+function copyFileSync(source, target) {
     var targetFile = target;
-    try{
+    try {
         //if target is a directory a new file with the same name will be created
-        if ( fs.existsSync( target ) ) {
-            if ( fs.lstatSync( target ).isDirectory() ) {
-                targetFile = path.join( target, path.basename( source ) );
+        if (fs.existsSync(target)) {
+            if (fs.lstatSync(target).isDirectory()) {
+                targetFile = path.join(target, path.basename(source));
             }
         }
         fs.writeFileSync(targetFile, fs.readFileSync(source));
-    } catch(err){
-        console.error(err);
+    } catch (err) {
+        LOGGER.printError(err);
     }
-
 }
 
-function stop(){
-    started = false;
-}
 
-module.exports = {start, stop};
+function validaPath(path) {
+    if (!fs.existsSync(path)) {
+        throw 'ERROR: Path Inválido => ' + path;
+    } else {
+        return true
+    }
+}
+module.exports.init = start;
+//module.exports = { start };
