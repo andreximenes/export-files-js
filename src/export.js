@@ -1,17 +1,24 @@
+'use strict'
 const path = require('path');
 const fs = require('fs');
 const LOGGER = require('./logger');
+const shell = require('shelljs');
 
 let dtUltExport = null;
 let started = true;
 
 const EXTENSION = ".class";
 
-URL_ORIGEM = 'DIGITE AQUI...';
-URL_DESTINO = 'DIGITE AQUI...';
-TIMEOUT = 5000;
+const URL_ORIGEM = 'D:\\workspace_sts\\p2k-15.07.XX\\bin';
+const URL_DESTINO = 'D:\\Exportador\\Exportados\\TIM';
+const TIMEOUT = 5000;
 
-function start() {
+
+//Inicio da aplicação.
+start();
+
+
+function start(){
     try {
         validaPath(URL_ORIGEM);
         LOGGER.clear();
@@ -69,7 +76,8 @@ function copyFolderRecursiveSync(source, target) {
                     let fileExtension = file.substring(file.indexOf('.'));
                     if (fileDtLastModified > dtUltExport && fileExtension === EXTENSION) {
                         if (!fs.existsSync(targetFolder)) {
-                            fs.mkdirSync(targetFolder, { recursive: true });
+                            //fs.mkdirSync(targetFolder, { recursive: true });
+                            shell.mkdir('-p', targetFolder);
                         }
                         dtUltExport = fileDtLastModified;
                         copyFileSync(curSource, targetFolder);
@@ -106,5 +114,3 @@ function validaPath(path) {
         return true
     }
 }
-module.exports.init = start;
-//module.exports = { start };

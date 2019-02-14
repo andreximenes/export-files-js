@@ -6,9 +6,12 @@
   "license": "MIT",
   "main": "export.js",
   "scripts": {
-    "watch": "node -e 'require(\"./src/export\").init()'"
+    "watch": "node ./src/export"
   },
   "dependencies": {
     "chalk": "^2.4.2"
+  },
+  "devDependencies": {
+    "shelljs": "^0.8.3"
   }
 }
