@@ -7,8 +7,8 @@ let started = true;
 
 const EXTENSION = ".class";
 
-URL_ORIGEM = '/Users/ximenes/desenvolvimento/eclipse_workspace/p2k-15.07.XX-TIM/bin';
-URL_DESTINO = '/Users/ximenes/Desktop';
+URL_ORIGEM = 'DIGITE AQUI...';
+URL_DESTINO = 'DIGITE AQUI...';
 TIMEOUT = 5000;
 
 function start() {
